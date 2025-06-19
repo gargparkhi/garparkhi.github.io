@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flyer Escape Room</title>
+<link rel="icon" href="https://via.placeholder.com/32/FFCC00/000000?text=F" type="image/png">
+<style>
+    /* Universal Box Sizing for better layout control */
+    html, body {
+        box-sizing: border-box;
+    }
+    *, *:before, *:after {
+        box-sizing: inherit;
+    }
+
+    /* CSS Variables for easy theming */
+    :root {
+        /* Professional & Readable Palette */
+        --bg-lightest: hsl(0, 0%, 98%); /* Near white for body background */
+        --bg-light: hsl(0, 0%, 93%);    /* Very light gray for element backgrounds */
+        --text-dark: hsl(0, 0%, 20%);   /* Dark gray for readability */
+
+        --primary-blue: hsl(210, 80%, 40%); /* Strong, deep professional blue */
+        --secondary-grey-blue: hsl(210, 20%, 60%); /* Softer, muted blue-gray for borders */
+
+        --accent-green-professional: hsl(140, 70%, 40%); /* Clear green for success */
+        --accent-red-professional: hsl(0, 70%, 50%); /* Clear red for error/wrong */
+
+        --header-bg: hsl(210, 80%, 20%); /* Darker blue for header background */
+        --button-text-light: white; /* White text for buttons on dark backgrounds */
+
+        --border-radius-base: 8px;
+        --padding-base: 1rem;
+        --gap-small: 0.5rem;
+        --gap-medium: 1rem;
+        --gap-large: 2rem;
+    }
+
+    body {
+        font-family: 'Arial', sans-serif;
+        background: var(--bg-lightest) !important; /* Force light background */
+        color: var(--text-dark) !important; /* Force dark text */
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        justify-content: flex-start;
+    }
+
+    header {
+        width: 100%;
+        background-color: var(--header-bg); /* Dark blue header for logo contrast */
+        padding: var(--gap-small);
+        display: flex;
+        justify-content: center;
+        border-bottom: 2px solid var(--primary-blue); /* Primary blue border */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Professional shadow */
+        flex-shrink: 0;
+    }
+
+    header img {
+        max-width: 150px;
+        height: auto;
+    }
+
+    /* Container for stages to allow absolute positioning */
+    #game-area {
+        position: relative;
+        width: 90%;
+        max-width: 950px;
+        flex-grow: 1;
+        margin: var(--gap-large) 0;
+        min-height: 600px; /* Default min-height for desktop */
+        box-sizing: border-box;
+    }
+
+    .stage {
+        padding: var(--gap-medium) var(--gap-large);
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+
+        background: var(--bg-light) !important; /* Force light background for stages */
+        border-radius: var(--border-radius-base); /* Consistent rounded corners */
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        border: 1px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+        overflow-y: auto; /* Allow vertical scrolling within stages */
+    }
+
+    .stage.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: var(--gap-medium);
+        color: var(--primary-blue) !important; /* Force primary blue heading color */
+        font-size: 2.2em;
+        letter-spacing: 1px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Very subtle shadow */
+    }
+
+    p {
+        text-align: center;
+        margin-bottom: var(--gap-medium);
+        line-height: 1.5;
+        color: var(--text-dark);
+    }
+
+    .riddle-text {
+        font-style: italic;
+        text-align: center;
+        padding: var(--gap-medium);
+        background-color: var(--bg-lightest); /* Near white background */
+        border-radius: var(--border-radius-base);
+        margin-bottom: var(--gap-large);
+        border: 2px solid var(--secondary-grey-blue); /* Solid muted blue-gray border */
+        color: var(--text-dark);
+    }
+
+    .input-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--gap-medium);
+    }
+
+    .input-box input[type="text"] {
+        font-size: 1.1em;
+        padding: var(--gap-small) var(--gap-medium);
+        border-radius: var(--border-radius-base);
+        border: 2px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+        background-color: white; /* Pure white input background */
+        color: var(--text-dark);
+        width: 80%; /* Default width */
+        max-width: 300px;
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .input-box input[type="text"]:focus {
+        border-color: var(--primary-blue); /* Primary blue border on focus */
+        box-shadow: 0 0 8px rgba(var(--primary-blue-rgb), 0.3); /* Subtle blue glow */
+    }
+
+    button {
+        padding: 0.8rem 1.5rem;
+        font-size: 1.1em;
+        background-color: var(--primary-blue); /* Primary blue button */
+        color: var(--button-text-light); /* White text */
+        border: none;
+        border-radius: var(--border-radius-base);
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.2s ease;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Professional button shadow */
+    }
+
+    button:hover:not(:disabled) {
+        background-color: hsl(210, 80%, 30%); /* Slightly darker blue on hover */
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15); /* Slightly larger shadow on hover */
+    }
+
+    button:disabled {
+        background-color: var(--bg-light);
+        color: var(--secondary-grey-blue); /* Muted text for disabled */
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    /* Stage 2: Word Search Specific Styles */
+    .word-search-content-wrapper {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        gap: var(--gap-large);
+        width: 100%;
+        padding: var(--gap-medium);
+        background-color: var(--bg-lightest); /* Near white background */
+        border-radius: var(--border-radius-base);
+        border: 2px solid var(--secondary-grey-blue); /* Solid muted blue-gray border */
+        box-sizing: border-box;
+        margin-bottom: var(--gap-medium);
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.05); /* Subtle inner shadow */
+    }
+
+    #grid {
+        display: grid;
+        grid-template-columns: repeat(15, minmax(30px, 1fr)); /* Default cell size */
+        grid-auto-rows: 30px;
+        gap: 2px;
+        width: fit-content; /* Allows grid to shrink as much as cells allow */
+        flex-shrink: 0;
+        flex-grow: 0;
+    }
+
+    .cell {
+        width: 100%;
+        height: 100%;
+        background: white; /* White background for cells */
+        border: 1px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        font-weight: bold;
+        font-size: 0.85em; /* Default cell font size */
+        color: var(--text-dark);
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+        border-radius: 2px; /* Slightly rounded cells */
+    }
+
+    .selected {
+        background: var(--primary-blue); /* Primary blue for selection */
+        border-color: var(--primary-blue);
+        color: var(--button-text-light); /* White text for contrast */
+    }
+
+    .found {
+        background: var(--accent-green-professional); /* Professional green for found */
+        color: var(--button-text-light); /* White text for contrast */
+        border-color: var(--accent-green-professional);
+        animation: pulseFound 0.5s ease-out;
+    }
+
+    @keyframes pulseFound {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    #words-list-container {
+        flex-basis: 180px;
+        flex-grow: 1;
+        min-width: 150px;
+        padding: var(--gap-small);
+        box-sizing: border-box;
+    }
+
+    #words-list-container h3 {
+        color: var(--primary-blue); /* Primary blue for word list heading */
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: var(--gap-small);
+        font-size: 1.2em;
+    }
+
+    #words {
+        margin-top: 0;
+        column-count: 1;
+        list-style: none;
+        padding: 0;
+    }
+
+    #words li {
+        margin-bottom: 5px;
+        color: var(--text-dark);
+        font-size: 1.0em;
+        transition: text-decoration 0.3s ease, color 0.3s ease;
+    }
+
+    #words li.found-word-list {
+        text-decoration: line-through;
+        color: var(--accent-green-professional); /* Professional green for found words in list */
+        font-weight: bold;
+    }
+
+    /* Stage 3: Connections Game Specific Styles */
+    #connections-container {
+        max-width: 800px;
+        margin: var(--gap-medium) auto;
+        padding: var(--gap-medium);
+        background-color: var(--bg-lightest);
+        border-radius: var(--border-radius-base);
+        border: 2px solid var(--secondary-grey-blue); /* Solid muted blue-gray border */
+        box-sizing: border-box;
+        width: 100%;
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.05); /* Subtle inner shadow */
+    }
+
+    #found-groups {
+        margin-bottom: 2rem;
+    }
+
+    .group {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        align-items: center;
+        padding: 0.5rem;
+        background-color: var(--bg-light); /* Light background for found groups */
+        border-radius: var(--border-radius-base);
+        border: 1px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+    }
+
+    .group-label {
+        font-weight: bold;
+        color: var(--primary-blue); /* Primary blue for group label */
+        margin-right: 1rem;
+        flex-basis: 100%;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.02);
+    }
+
+    #connections-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .tile {
+        padding: 1rem;
+        border: 2px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+        border-radius: var(--border-radius-base);
+        cursor: pointer;
+        background-color: white; /* White tile background */
+        color: var(--text-dark);
+        transition: transform 0.2s, background-color 0.3s, color 0.3s, border-color 0.3s;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 70px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08); /* Subtle tile shadow */
+    }
+
+    .tile.selected {
+        background-color: var(--accent-red-professional); /* Professional red selection */
+        color: var(--button-text-light); /* White text */
+        border-color: var(--accent-red-professional);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .tile.locked {
+        background-color: var(--primary-blue); /* Primary blue locked */
+        color: var(--button-text-light); /* White text */
+        cursor: default;
+        border-color: var(--primary-blue);
+        box-shadow: none;
+    }
+
+    .tile.wrong {
+        border-color: var(--accent-red-professional); /* Professional red for wrong */
+        animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        50% { transform: translateX(4px); }
+        75% { transform: translateX(-4px); }
+        100% { transform: translateX(0); }
+    }
+
+    #connections-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .btn-restart-connections {
+        background-color: var(--primary-blue); /* Primary blue restart button */
+        color: var(--button-text-light);
+    }
+
+    /* Stage 4: Team Match */
+    #prompt-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Default prompt size */
+        gap: var(--gap-large);
+        margin-top: var(--gap-large);
+        width: 100%;
+    }
+
+    .prompt {
+        background: var(--bg-light); /* Light background */
+        border: 2px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+        padding: var(--padding-base);
+        border-radius: var(--border-radius-base);
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap-small);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08); /* Subtle shadow */
+    }
+
+    .prompt p {
+        margin: 0;
+        font-size: 0.9em;
+        color: var(--primary-blue); /* Primary blue for prompt text */
+        text-align: left;
+        font-weight: bold;
+    }
+
+    .prompt input {
+        width: 100%; /* Make input fill its container */
+        padding: 0.5rem;
+        font-size: 1em;
+        border-radius: var(--border-radius-base);
+        border: 2px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+        background-color: white; /* White input background */
+        color: var(--text-dark);
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .prompt input:focus {
+        border-color: var(--primary-blue); /* Primary blue border on focus */
+        box-shadow: 0 0 8px rgba(var(--primary-blue-rgb), 0.3); /* Subtle blue glow */
+    }
+
+    .final-message {
+        margin-top: var(--gap-large);
+        color: var(--accent-green-professional); /* Professional green for final message */
+        font-weight: bold;
+        text-align: center;
+        font-size: 1.2em;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.02);
+    }
+
+    /* Notification Area */
+    #notificationArea {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        border-radius: var(--border-radius-base);
+        font-weight: bold;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    #notificationArea.success {
+        background-color: var(--accent-green-professional); /* Professional green */
+        color: var(--button-text-light); /* White text */
+    }
+
+    #notificationArea.error {
+        background-color: var(--accent-red-professional); /* Professional red */
+        color: var(--button-text-light); /* White text */
+    }
+
+    #notificationArea.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Utility to get RGB values for rgba() from HSL for shadows/glows */
+    :root {
+        --primary-blue-rgb: 21, 101, 192; /* HSL(210, 80%, 40%) */
+    }
+
+
+    /* Media queries for responsiveness */
+    /* Tablet & Smaller Laptop Landscape */
+    @media (max-width: 900px) {
+        #game-area {
+            min-height: 650px; /* Slightly reduce min-height */
+        }
+        .stage {
+             padding: var(--gap-medium); /* Reduce side padding */
+        }
+    }
+
+    /* Tablet Portrait & Large Phone Landscape */
+    @media (max-width: 768px) {
+        #game-area {
+            min-height: 550px;
+        }
+        #grid {
+            grid-template-columns: repeat(15, minmax(28px, 1fr)); /* Slightly smaller cells */
+            grid-auto-rows: 28px;
+        }
+        .cell {
+            font-size: 0.8em; /* Adjust font size */
+        }
+        #prompt-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Allow prompts to be smaller */
+        }
+    }
+
+    /* Smaller Phones & Tablet Portrait */
+    @media (max-width: 500px) {
+        #game-area {
+            min-height: 500px; /* Further reduce min-height */
+            margin: var(--gap-medium) 0; /* Less margin on smaller screens */
+        }
+        h1 {
+            font-size: 1.8em;
+        }
+        .riddle-text {
+            padding: var(--gap-small);
+            font-size: 0.95em;
+        }
+        .input-box input[type="text"] {
+            width: 90%; /* Increase width to fill more space */
+            padding: 0.6rem 0.8rem; /* Slightly reduced padding */
+            font-size: 1em;
+        }
+        button {
+            padding: 0.7rem 1.2rem;
+            font-size: 1em;
+        }
+        .word-search-content-wrapper {
+            flex-direction: column; /* Stack word search elements vertically */
+            align-items: center;
+            gap: var(--gap-medium);
+        }
+        #words-list-container {
+            width: 100%;
+            max-width: 250px; /* Constrain list width */
+            margin-top: 0;
+        }
+        #words {
+            column-count: 2;
+            text-align: left;
+            width: 100%;
+        }
+        #words li {
+             text-align: center;
+        }
+        #grid {
+            grid-template-columns: repeat(15, minmax(24px, 1fr)); /* More aggressive cell size reduction */
+            grid-auto-rows: 24px;
+            font-size: 0.7em; /* Smaller font for cells */
+        }
+        #connections-grid {
+            grid-template-columns: repeat(2, 1fr); /* 2 columns for connections */
+            gap: 8px;
+        }
+        .tile {
+            font-size: 14px;
+            min-height: 60px;
+            padding: 0.8rem;
+        }
+        .group-label {
+            font-size: 0.9em;
+        }
+        #prompt-grid {
+            gap: var(--gap-medium);
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Smaller prompts */
+        }
+        .prompt input {
+            padding: 0.4rem; /* Reduced padding */
+            font-size: 0.9em; /* Reduced font size */
+        }
+    }
+
+    /* Very Small Phones (e.g., iPhone SE portrait) */
+    @media (max-width: 360px) {
+        #game-area {
+            min-height: 450px; /* Minimum height for very small screens */
+            width: 95%; /* Use more screen width */
+        }
+        h1 {
+            font-size: 1.6em;
+        }
+        .riddle-text {
+            font-size: 0.9em;
+            padding: var(--gap-small);
+        }
+        .input-box input[type="text"] {
+            width: 95%; /* Even wider to fit small screens */
+            padding: 0.3rem 0.5rem; /* Minimal padding */
+            font-size: 0.85em; /* Even smaller font */
+        }
+        #grid {
+            grid-template-columns: repeat(15, minmax(18px, 1fr)); /* Very small cells for tight fit */
+            grid-auto-rows: 18px;
+            font-size: 0.6em; /* Even smaller font */
+            gap: 1px; /* Reduce gap between cells */
+        }
+        .cell {
+            border-width: 0.5px; /* Thinner borders for very small cells */
+        }
+        #words li {
+            font-size: 0.9em;
+        }
+        #connections-grid {
+            gap: 5px;
+        }
+        .tile {
+            font-size: 12px;
+            min-height: 50px;
+            padding: 0.5rem;
+            border-width: 1px; /* Thinner tile borders */
+        }
+        .group-label {
+            font-size: 0.8em;
+        }
+        #prompt-grid {
+            gap: var(--gap-small);
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Smallest prompt size */
+        }
+        .prompt p {
+            font-size: 0.85em;
+        }
+        .prompt input {
+            padding: 0.4rem;
+            font-size: 0.9em;
+        }
+    }
+
+</style>
+</head>
+<body>
+<header>
+<img src="https://i.imgur.com/d3304b6e-5565-403d-8499-a9ef150ef943.png" alt="Flyer Logo" />
+</header>
+
+<div id="notificationArea" class="notification-message"></div>
+
+<div id="game-area">
+    <div class="stage active" data-stage="1">
+        <h1>Stage 1: Solve the Riddle</h1>
+        <p class="riddle-text">
+            I am not a bird, yet I help you soar,<br>
+            From shopfloor tasks to strategic core.<br>
+            I don’t give wings, but I shift your view,<br>
+            From technical depth to business too.<br>
+            You started with tools, now you lead with insight,<br>
+            Evolving each day, taking bold flight.<<br>
+            A first-line spark, with a curious mind,<br>
+            What program am I — for the driven, the kind?
+        </p>
+        <div class="input-box">
+            <input type="text" id="riddleAnswer" placeholder="Enter here..." />
+            <button id="riddleSubmitBtn">Submit</button>
+        </div>
+    </div>
+
+    <div class="stage" data-stage="2">
+        <h1>Stage 2: Word Search</h1>
+        <p>Find all the hidden words to proceed to the next stage.</p>
+        <div class="word-search-content-wrapper">
+            <div id="grid"></div> <div id="words-list-container">
+                <h3>Words to Find</h3>
+                <ul id="words">
+                    </ul>
+            </div>
+        </div>
+        <button id="toStage3" disabled style="display: none;">Next Stage</button>
+    </div>
+
+    <div class="stage" data-stage="3">
+        <h1>Stage 3: Flyer Connections</h1>
+        <p>Find groups of four items that share a common thread.</p>
+        <div id="connections-container">
+            <div id="found-groups"></div>
+            <div id="connections-grid"></div> <div id="connections-buttons">
+                <button class="btn-restart-connections" id="connectionsRestartBtn">Restart</button>
+                </div>
+        </div>
+    </div>
+
+    <div class="stage" data-stage="4">
+        <h1>Stage 4: Match the Team</h1>
+        <p>Match the prompts below with a team member’s name. This is for fun and team bonding!</p>
+        <div id="prompt-grid">
+            </div>
+        <p id="stage3CompletionMessage" class="final-message" style="display: none;">
+            ✅ All prompts filled! Once done, take a screenshot and share it in the main chat!
+        </p>
+    </div>
+</div> <script>
+    // Configuration Object: Centralized game data
+    const CONFIG = {
+        riddle: {
+            text: "I am not a bird, yet I help you soar,<br>From shopfloor tasks to strategic core.<br>I don’t give wings, but I shift your view,<br>From technical depth to business too.<br>You started with tools, now you lead with insight,<br>Evolving each day, taking bold flight.<br>A first-line spark, with a curious mind,<br>What program am I — for the driven, the kind?",
+            answer: "flyer",
+            successMessage: "Correct! Advancing to the next challenge..."
+        },
+        wordSearch: {
+            gridData: [
+              ['C','O','L','L','A','B','O','R','A','T','E','B','P','L','I'],
+              ['Z','J','K','M','N','P','Q','A','F','R','V','A','F','U','N'],
+              ['W','E','I','M','P','A','C','T','Y','G','H','N','L','R','N'],
+              ['X','Y','Z','L','A','U','N','C','H','N','J','G','Y','E','O'],
+              ['S','T','R','A','T','E','G','Y','K','L','M','A','E','S','V'],
+              ['Q','V','W','X','C','A','D','R','E','A','B','L','R','T','A'],
+              ['J','K','G','R','O','W','T','H','P','Q','R','O','N','U','T'],
+              ['S','F','T','U','V','W','X','Y','Z','G','H','R','C','V','E'],
+              ['V','I','S','I','O','N','A','B','C','D','E','E','H','W','X'],
+              ['K','L','M','N','O','P','Q','R','S','T','U','L','I','X','Y'],
+              ['A','G','I','L','E','V','W','X','Y','Z','A','E','K','L','Z'],
+              ['M','N','I','J','I','K','L','M','N','O','P','A','M','N','A'],
+              ['O','P','Q','R','I','S','T','U','V','W','X','R','N','O','B'],
+              ['S','T','U','V','M','W','X','Y','Z','A','B','N','O','P','C'],
+              ['W','X','Y','Z','B','A','B','C','D','E','F','S','P','Q','D']
+            ],
+            words: [
+                'COLLABORATE', 'IMPACT', 'STRATEGY', 'GROWTH', 'VISION', 'AGILE',
+                'INNOVATE', 'FLYER', 'LAUNCH', 'LEARN'
+            ]
+        },
+        connections: {
+            categories: {
+                "Roles you'll transition to": ["Sales & Customer Interface", "Procurement & Supply Chain", "Analytics & Strategic Planning", "Manufacturing Excellence & Project Management"],
+                "FLYER Elements": ["Development", "IIM Bangalore", "Growth Opportunities", "Leadership Access"],
+                "Places to explore at IIM B": ["Mustard Cafe", "Library", "Jigani Campus", "Forest trail"],
+                "RIL industry bandwidth": ["Only Vimal", "Spice Trading", "Refinery", "Telecom"]
+            }
+        },
+        teamMatch: {
+            prompts: [
+                { id: 'p1', text: 'Owns a pet'},
+                { id: 'p2', text: 'Goes to gym daily' },
+                { id: 'p3', text: 'Read more than 10 books in the last year' },
+                { id: 'p4', text: 'Has snacks stashed in their desk' },
+                // Removed 'p5': 'Has led a team during uncertain times'
+                { id: 'p5', text: 'Drinks more than 2 cups of coffee a day' },
+                { id: 'p6', text: 'Plays chess' },
+                { id: 'p7', text: 'Listened to music while working' },
+                { id: 'p8', text: 'Knows more than 3 Languages' },
+                { id: 'p9', text: 'Is excited about the IIM Bangalore program' }
+                // Removed 'p11': 'Has a clear career goal for the next 5 years' (Assuming this was the intended 'p12' if a third was to be removed)
+                // Note: There was no 'p12' in the original code. If you meant to remove p11, it's removed here.
+                // If you only meant to remove p1 and p5, please re-add p11 manually.
+            ]
+        }
+    };
+
+    // Main Game Class for managing all game logic and state
+    class FlyerEscapeRoom {
+        constructor() {
+            this.currentStage = 1;
+            // Word Search properties
+            this.foundWords = new Set();
+            this.isMouseDown = false;
+            this.wordSearchSelection = []; // Renamed to avoid conflict
+
+            // Connections game properties
+            this.connectionsAllWords = []; // Will be populated from CONFIG.connections.categories
+            this.connectionsSelectedWords = [];
+            this.connectionsMatchedGroups = new Set();
+            this.connectionsRestartCount = 0; // Track restarts for potential penalty or info
+
+            this.notificationTimeout = null;
+
+            this.initDOMReferences();
+            this.bindEvents();
+            this.initializeStages();
+            this.renderStage(this.currentStage);
+        }
+
+        /**
+         * Initializes references to DOM elements used throughout the game.
+         */
+        initDOMReferences() {
+            this.stages = document.querySelectorAll('.stage');
+            // Stage 1
+            this.riddleAnswerInput = document.getElementById('riddleAnswer');
+            this.riddleSubmitBtn = document.getElementById('riddleSubmitBtn');
+            // Stage 2
+            this.wordSearchGrid = document.getElementById('grid');
+            this.wordListUl = document.getElementById('words');
+            // Stage 3 (Connections)
+            this.connectionsContainer = document.getElementById('connections-container');
+            this.foundGroupsDiv = document.getElementById('found-groups');
+            this.connectionsGridDiv = document.getElementById('connections-grid'); // Renamed
+            this.connectionsRestartBtn = document.getElementById('connectionsRestartBtn'); // New button ID
+            // Stage 4 (Team Match)
+            this.promptGridDiv = document.getElementById('prompt-grid');
+            this.stage4CompletionMessage = document.getElementById('stage3CompletionMessage'); // Renamed ID
+            
+            this.notificationArea = document.getElementById('notificationArea');
+        }
+
+        /**
+         * Binds all necessary event listeners.
+         */
+        bindEvents() {
+            // Stage 1: Riddle submission
+            this.riddleSubmitBtn.addEventListener('click', () => this.checkRiddle());
+            this.riddleAnswerInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    this.checkRiddle();
+                }
+            });
+
+            // Stage 2: Word Search events
+            this.wordSearchGrid.addEventListener('mousedown', this.handleWordSearchMouseDown.bind(this));
+            this.wordSearchGrid.addEventListener('mouseup', this.handleWordSearchMouseUp.bind(this));
+            this.wordSearchGrid.addEventListener('mouseover', this.handleWordSearchMouseOver.bind(this));
+            document.addEventListener('mouseup', () => { // Global mouseup for word search
+                if (this.isMouseDown) {
+                    this.isMouseDown = false;
+                    this.clearWordSearchSelection();
+                    this.wordSearchSelection = [];
+                }
+            });
+
+            // Stage 3: Connections Game events
+            // Use event delegation for tiles as they are created dynamically
+            this.connectionsGridDiv.addEventListener('click', (event) => {
+                const targetTile = event.target.closest('.tile');
+                if (targetTile) {
+                    this.handleConnectionsTileClick(targetTile);
+                }
+            });
+            this.connectionsRestartBtn.addEventListener('click', () => this.restartConnectionsGame());
+
+            // Stage 4: Team Match events
+            this.promptGridDiv.addEventListener('input', () => this.checkStage4Completion());
+        }
+
+        /**
+         * Initializes content for each game stage.
+         */
+        initializeStages() {
+            this.createWordSearchGrid();
+            this.updateWordListDisplay();
+            this.initializeConnectionsGame(); // New initialization for Connections
+            this.createPromptGrid();
+        }
+
+        /**
+         * Displays a specific game stage and hides others.
+         * @param {number} stageNum The number of the stage to render (1, 2, 3, or 4).
+         */
+        renderStage(stageNum) {
+            this.stages.forEach(stage => {
+                if (parseInt(stage.dataset.stage) === stageNum) {
+                    stage.classList.add('active');
+                } else {
+                    stage.classList.remove('active');
+                }
+            });
+            this.currentStage = stageNum;
+        }
+
+        // --- Stage 1 Logic: Solve the Riddle ---
+        checkRiddle() {
+            const answer = this.riddleAnswerInput.value.trim().toLowerCase();
+            if (answer === CONFIG.riddle.answer) {
+                this.showNotification(CONFIG.riddle.successMessage, 'success');
+                this.riddleSubmitBtn.disabled = true;
+                this.riddleAnswerInput.disabled = true;
+                setTimeout(() => {
+                    this.renderStage(2); // Auto-advance to Stage 2
+                    this.riddleAnswerInput.value = '';
+                    this.riddleSubmitBtn.disabled = false;
+                    this.riddleAnswerInput.disabled = false;
+                }, 1500);
+            } else {
+                this.showNotification("❌ Incorrect! Try again.", 'error');
+                this.riddleAnswerInput.value = '';
+            }
+        }
+
+        // --- Stage 2 Logic: Word Search ---
+        createWordSearchGrid() {
+            this.wordSearchGrid.innerHTML = '';
+            CONFIG.wordSearch.gridData.forEach((rowArr, rowIndex) => {
+                rowArr.forEach((char, colIndex) => {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.textContent = char;
+                    cell.dataset.row = rowIndex;
+                    cell.dataset.col = colIndex;
+                    this.wordSearchGrid.appendChild(cell);
+                });
+            });
+        }
+
+        updateWordListDisplay() {
+            this.wordListUl.innerHTML = '';
+            CONFIG.wordSearch.words.forEach(word => {
+                const li = document.createElement('li');
+                li.textContent = word;
+                if (this.foundWords.has(word)) {
+                    li.classList.add('found-word-list');
+                }
+                this.wordListUl.appendChild(li);
+            });
+        }
+
+        handleWordSearchMouseDown(e) {
+            if (!e.target.classList.contains('cell') || e.button !== 0) return;
+            
+            this.clearWordSearchSelection();
+            this.isMouseDown = true;
+            e.target.classList.add('selected');
+            this.wordSearchSelection.push(e.target);
+        }
+
+        handleWordSearchMouseOver(e) {
+            if (!this.isMouseDown || !e.target.classList.contains('cell')) return;
+
+            const newCell = e.target;
+            if (this.wordSearchSelection.includes(newCell)) return;
+
+            const lastSelected = this.wordSearchSelection[this.wordSearchSelection.length - 1];
+            if (!lastSelected) return;
+
+            const prevRow = parseInt(lastSelected.dataset.row);
+            const prevCol = parseInt(lastSelected.dataset.col);
+            const newRow = parseInt(newCell.dataset.row);
+            const newCol = parseInt(newCell.dataset.col);
+
+            let isStraight = false;
+            if (this.wordSearchSelection.length === 1) {
+                isStraight = (newRow === prevRow) || (newCol === prevCol) ||
+                             (Math.abs(newRow - prevRow) === Math.abs(newCol - prevCol));
+            } else {
+                const firstSelected = this.wordSearchSelection[0];
+                const firstRow = parseInt(firstSelected.dataset.row);
+                const firstCol = parseInt(firstSelected.dataset.col);
+
+                const dR_initial = prevRow - firstRow;
+                const dC_initial = prevCol - firstCol;
+                const dR_current = newRow - firstRow;
+                const dC_current = newCol - firstCol;
+
+                isStraight = (dR_initial * dC_current - dC_initial * dR_current === 0);
+
+                const distancePrev = Math.max(Math.abs(newRow - prevRow), Math.abs(newCol - prevCol));
+                if (distancePrev !== 1) {
+                    isStraight = false;
+                }
+            }
+
+            if (isStraight) {
+                newCell.classList.add('selected');
+                this.wordSearchSelection.push(newCell);
+            } else {
+                this.clearWordSearchSelection();
+                this.wordSearchSelection = [];
+                this.isMouseDown = false;
+                this.showNotification("Selection must be a straight line!", 'error', 1500);
+            }
+        }
+
+        handleWordSearchMouseUp() {
+            this.isMouseDown = false;
+            if (this.wordSearchSelection.length === 0) {
+                this.clearNotification();
+                return;
+            }
+
+            const selectedWordChars = this.wordSearchSelection.map(el => el.textContent);
+            const selectedWord = selectedWordChars.join('');
+            const reversedSelectedWord = selectedWordChars.slice().reverse().join(''); // Use slice() to prevent modifying original
+
+            const foundMatch = CONFIG.wordSearch.words.find(word =>
+                word === selectedWord || word === reversedSelectedWord
+            );
+
+            if (foundMatch && !this.foundWords.has(foundMatch)) {
+                this.wordSearchSelection.forEach(el => el.classList.replace('selected', 'found'));
+                this.foundWords.add(foundMatch);
+                this.updateWordListDisplay();
+                this.showNotification(`Found: "${foundMatch}"!`, 'success');
+
+                if (this.foundWords.size === CONFIG.wordSearch.words.length) {
+                    this.showNotification("🎉 All words found! Advancing to the next stage.", 'success', 2000);
+                    setTimeout(() => this.renderStage(3), 2500); // Auto-advance to Stage 3 (Connections)
+                }
+            } else {
+                this.clearWordSearchSelection();
+                if (foundMatch && this.foundWords.has(foundMatch)) {
+                     this.showNotification("Word already found!", 'error');
+                } else {
+                    this.showNotification("Not a valid word. Try again!", 'error');
+                }
+            }
+            this.wordSearchSelection = [];
+        }
+
+        clearWordSearchSelection() {
+            document.querySelectorAll('#grid .selected').forEach(el => el.classList.remove('selected'));
+        }
+
+        // --- Stage 3 Logic: Connections Game ---
+        initializeConnectionsGame() {
+            this.connectionsAllWords = Object.values(CONFIG.connections.categories).flat().sort(() => 0.5 - Math.random());
+            this.connectionsSelectedWords = [];
+            this.connectionsMatchedGroups.clear();
+            // this.connectionsRestartCount = 0; // Keep track of restarts, don't reset unless explicit full game restart
+            this.foundGroupsDiv.innerHTML = ""; // Clear found groups display
+            this.createConnectionsGrid();
+        }
+
+        createConnectionsGrid() {
+            this.connectionsGridDiv.innerHTML = "";
+            this.connectionsAllWords.forEach(word => {
+                const div = document.createElement("div");
+                div.classList.add("tile");
+                div.textContent = word;
+                // Event listener is on the parent container (connectionsGridDiv) now for delegation
+                this.connectionsGridDiv.appendChild(div);
+            });
+        }
+
+        handleConnectionsTileClick(tile) { // Removed event parameter, now directly passes tile
+            if (tile.classList.contains("locked")) return;
+
+            // If we're at 4 selected words, this click implies a new selection or deselection
+            if (this.connectionsSelectedWords.length === 4 && !tile.classList.contains("selected")) {
+                this.showNotification("You've already selected 4 words. Deselect one or validate.", 'error', 2000);
+                return;
+            }
+
+            tile.classList.toggle("selected");
+            const word = tile.textContent;
+
+            if (tile.classList.contains("selected")) {
+                this.connectionsSelectedWords.push(word);
+            } else {
+                this.connectionsSelectedWords = this.connectionsSelectedWords.filter(w => w !== word);
+            }
+
+            if (this.connectionsSelectedWords.length === 4) {
+                this.validateConnectionsSelection();
+            }
+        }
+
+        validateConnectionsSelection() {
+            let foundCategory = null;
+            for (const [category, words] of Object.entries(CONFIG.connections.categories)) {
+                // Check if all selected words are in the current category AND the category hasn't been found yet
+                const isMatch = this.connectionsSelectedWords.every(word => words.includes(word));
+                if (isMatch && !this.connectionsMatchedGroups.has(category)) {
+                    foundCategory = category;
+                    this.connectionsMatchedGroups.add(category);
+                    break;
+                }
+            }
+
+            if (foundCategory) {
+                this.showConnectionsGroup(foundCategory);
+                this.showNotification(`Correct! Found: "${foundCategory}"`, 'success');
+                if (this.connectionsMatchedGroups.size === Object.keys(CONFIG.connections.categories).length) {
+                    this.showNotification("🎉 All connections found! Advancing to the final stage.", 'success', 2500);
+                    setTimeout(() => this.renderStage(4), 3000); // Auto-advance to Stage 4 (Team Match)
+                }
+            } else {
+                this.showWrongConnectionsSelection();
+                this.showNotification("Incorrect group. Try again!", 'error');
+            }
+            this.connectionsSelectedWords = []; // Clear selection for next attempt
+        }
+
+        showConnectionsGroup(category) {
+            const groupDiv = document.createElement("div");
+            groupDiv.className = "group";
+            const label = document.createElement("div");
+            label.className = "group-label";
+            label.textContent = category;
+            groupDiv.appendChild(label);
+
+            const tilesToMove = [];
+            // Collect selected tiles first to avoid issues with live DOM iteration
+            document.querySelectorAll('#connections-grid .tile.selected').forEach(tile => {
+                tilesToMove.push(tile);
+            });
+
+            tilesToMove.forEach(tile => {
+                tile.classList.remove("selected");
+                tile.classList.add("locked");
+                groupDiv.appendChild(tile); // Move the tile to the found-groups container
+            });
+            this.foundGroupsDiv.appendChild(groupDiv);
+        }
+
+        showWrongConnectionsSelection() {
+            document.querySelectorAll('#connections-grid .tile.selected').forEach(tile => {
+                tile.classList.add("wrong");
+                setTimeout(() => {
+                    tile.classList.remove("wrong");
+                    tile.classList.remove("selected"); // Deselect after showing wrong
+                }, 400);
+            });
+        }
+
+        restartConnectionsGame() {
+            this.connectionsRestartCount++;
+            this.showNotification(`Restarting Connections game. Attempts: ${this.connectionsRestartCount}`, 'error', 2000); // Inform restart
+            this.initializeConnectionsGame();
+        }
+
+        // --- Stage 4 Logic: Match the Team (formerly Stage 3) ---
+        createPromptGrid() {
+            this.promptGridDiv.innerHTML = '';
+            CONFIG.teamMatch.prompts.forEach(prompt => {
+                const div = document.createElement('div');
+                div.classList.add('prompt');
+                div.innerHTML = `<p>${prompt.text}</p><input type="text" data-prompt-id="${prompt.id}" placeholder="Team Member Name" />`;
+                this.promptGridDiv.appendChild(div);
+            });
+        }
+
+        checkStage4Completion() { // Renamed from checkStage3Completion
+            const inputs = this.promptGridDiv.querySelectorAll('input[type="text"]');
+            const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
+            if (allFilled) {
+                this.stage4CompletionMessage.style.display = 'block';
+                this.showNotification("All prompts are filled! Ready for screenshot!", 'success', 0);
+            } else {
+                this.stage4CompletionMessage.style.display = 'none';
+                this.clearNotification();
+            }
+        }
+
+        // --- General Utilities ---
+        showNotification(message, type, duration = 3000) {
+            if (this.notificationTimeout) {
+                clearTimeout(this.notificationTimeout);
+            }
+
+            this.notificationArea.textContent = message;
+            this.notificationArea.className = `notification-message ${type} visible`;
+            
+            if (duration > 0) {
+                this.notificationTimeout = setTimeout(() => {
+                    this.clearNotification();
+                }, duration);
+            }
+        }
+
+        clearNotification() {
+            this.notificationArea.classList.remove('visible');
+            setTimeout(() => {
+                this.notificationArea.className = 'notification-message';
+                this.notificationArea.textContent = '';
+            }, 300);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        new FlyerEscapeRoom();
+    });
+</script>
+</body>
+</html>
