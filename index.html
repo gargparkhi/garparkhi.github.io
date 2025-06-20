@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Flyer Escape Room</title>
+<title>Breakout and Bond</title>
 <link rel="icon" href="https://via.placeholder.com/32/FFCC00/000000?text=F" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
 <style>
     /* Universal Box Sizing for better layout control */
     html, body {
@@ -14,23 +16,37 @@
         box-sizing: inherit;
     }
 
-    /* CSS Variables for easy theming */
+    /* CSS Variables for easy theming - UPDATED TO BRAND COLORS */
     :root {
-        /* Professional & Readable Palette */
-        --bg-lightest: hsl(0, 0%, 98%); /* Near white for body background */
-        --bg-light: hsl(0, 0%, 93%);    /* Very light gray for element backgrounds */
-        --text-dark: hsl(0, 0%, 20%);   /* Dark gray for readability */
+        /* Flyer Brand Colors */
+        --flyer-teal-rgb: 56, 194, 213;
+        --flyer-teal: rgb(56, 194, 213); /* Primary highlight, success, progress fill */
 
-        --primary-blue: hsl(210, 80%, 40%); /* Strong, deep professional blue */
-        --secondary-grey-blue: hsl(210, 20%, 60%); /* Softer, muted blue-gray for borders */
+        --flyer-purple-rgb: 85, 64, 126;
+        --flyer-purple: rgb(85, 64, 126); /* Selected tile, primary buttons */
 
-        --accent-green-professional: hsl(140, 70%, 40%); /* Clear green for success */
-        --accent-red-professional: hsl(0, 70%, 50%); /* Clear red for error/wrong */
+        --flyer-red-rgb: 255, 90, 96;
+        --flyer-red: rgb(255, 90, 96); /* Error, warning */
 
-        --header-bg: hsl(210, 80%, 20%); /* Darker blue for header background */
+        --flyer-black: hsl(0, 0%, 20%);   /* Dark text */
+        --flyer-white: hsl(0, 0%, 98%);    /* Near white background */
+
+        /* Mapped Variables */
+        --bg-lightest: var(--flyer-white);
+        --bg-light: hsl(0, 0%, 93%); /* Slightly off-white for elements */
+        --text-dark: var(--flyer-black);
+
+        --primary-accent: var(--flyer-purple); /* Main interactive color */
+        --secondary-neutral: hsl(0, 0%, 75%); /* Lighter gray for borders/muted elements */
+        --success-color: var(--flyer-teal);
+        --error-color: var(--flyer-red);
+
+        /* Stage 3 specific color (already requested) */
+        --connections-selected-color: var(--flyer-purple);
+
         --button-text-light: white; /* White text for buttons on dark backgrounds */
 
-        --border-radius-base: 8px;
+        --border-radius-base: 12px; /* ENHANCED: Increased for softer look */
         --padding-base: 1rem;
         --gap-small: 0.5rem;
         --gap-medium: 1rem;
@@ -38,9 +54,10 @@
     }
 
     body {
-        font-family: 'Arial', sans-serif;
-        background: var(--bg-lightest) !important; /* Force light background */
-        color: var(--text-dark) !important; /* Force dark text */
+        font-family: 'Inter', sans-serif; /* NEW FONT */
+        /* UPDATED: More visible subtle background gradient for overall feel */
+        background: linear-gradient(135deg, var(--bg-lightest) 0%, rgba(var(--flyer-teal-rgb), 0.03) 100%);
+        color: var(--text-dark) !important;
         margin: 0;
         padding: 0;
         display: flex;
@@ -48,45 +65,93 @@
         align-items: center;
         min-height: 100vh;
         justify-content: flex-start;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden; /* Prevent horizontal scroll from confetti/layout */
     }
 
-    header {
+    /* NEW: Global Header Styling */
+    .global-header {
         width: 100%;
-        background-color: var(--header-bg); /* Dark blue header for logo contrast */
-        padding: var(--gap-small);
+        background: var(--bg-light); /* Or a subtle gradient if desired */
+        padding: var(--gap-medium) var(--gap-large);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Soft shadow */
         display: flex;
-        justify-content: center;
-        border-bottom: 2px solid var(--primary-blue); /* Primary blue border */
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Professional shadow */
-        flex-shrink: 0;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky; /* Or fixed if preferred */
+        top: 0;
+        z-index: 100; /* Ensure it stays on top */
+        border-bottom: 1px solid var(--primary-accent);
+        box-sizing: border-box;
     }
 
-    header img {
-        max-width: 150px;
-        height: auto;
+    .global-header-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.8em;
+        color: var(--flyer-purple); /* Main title in purple */
+        margin: 0;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
     }
 
-    /* Container for stages to allow absolute positioning */
+    .stage-indicator {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.1em;
+        font-weight: 600;
+        color: var(--primary-accent);
+    }
+
+    /* NEW: Segmented Progress Bar */
+    .progress-bar-container {
+        width: 100%;
+        max-width: 950px;
+        margin: var(--gap-medium) 0;
+        height: 8px;
+        background-color: var(--secondary-neutral); /* Inactive background */
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .progress-segment {
+        flex: 1;
+        background-color: transparent;
+        height: 100%;
+        transition: background-color 0.5s ease;
+        border-right: 1px solid rgba(255,255,255,0.2); /* Visual separation */
+    }
+
+    .progress-segment:last-child {
+        border-right: none;
+    }
+
+    .progress-segment.active {
+        background-color: var(--primary-accent); /* Active color (Flyer Teal) */
+    }
+
+
     #game-area {
         position: relative;
         width: 90%;
         max-width: 950px;
         flex-grow: 1;
         margin: var(--gap-large) 0;
-        min-height: 600px; /* Default min-height for desktop */
+        min-height: 550px;
         box-sizing: border-box;
     }
 
     .stage {
-        padding: var(--gap-medium) var(--gap-large);
+        padding: var(--gap-medium) var(--gap-large); /* CORRECTED PADDING */
         width: 100%;
         height: 100%;
         box-sizing: border-box;
 
-        background: var(--bg-light) !important; /* Force light background for stages */
-        border-radius: var(--border-radius-base); /* Consistent rounded corners */
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-        border: 1px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+        background: var(--bg-light) !important;
+        border-radius: var(--border-radius-base); /* ENHANCED: Larger radius */
+        /* ENHANCED: Softer, more spread out shadow */
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--primary-accent); /* Mapped to new neutral */
 
         position: absolute;
         top: 0;
@@ -98,28 +163,61 @@
 
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-        overflow-y: auto; /* Allow vertical scrolling within stages */
+        transform: translateY(20px); /* Initial subtle offset for transition */
+        transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out, transform 0.5s ease-in-out;
+        overflow-y: auto;
     }
 
     .stage.active {
         opacity: 1;
         visibility: visible;
+        transform: translateY(0);
+    }
+
+    /* NEW: Wrapper for stage title and icon */
+    .stage-header-content {
+        display: flex;
+        align-items: center;
+        gap: var(--gap-small);
+        margin-bottom: var(--gap-small);
+        justify-content: center; /* Center content when gap is small */
+        width: 100%;
+        flex-wrap: wrap; /* Allow wrapping on small screens */
+    }
+
+    .stage-header-content h1 {
+        margin: 0; /* Remove default h1 margin when in flexbox */
+    }
+
+    .stage-header-content .stage-icon {
+        font-size: 1.5em; /* Size of the emoji icon */
+        line-height: 1; /* Align vertically with text */
     }
 
     h1 {
+        font-family: 'Poppins', sans-serif; /* NEW FONT */
         text-align: center;
         margin-top: 0;
-        margin-bottom: var(--gap-medium);
-        color: var(--primary-blue) !important; /* Force primary blue heading color */
+        /* margin-bottom: var(--gap-small); -> Moved to stage-header-content gap */
+        color: var(--primary-accent) !important; /* Mapped to Flyer Teal */
         font-size: 2.2em;
         letter-spacing: 1px;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Very subtle shadow */
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* New style for instruction paragraphs */
+    .stage-instruction {
+        text-align: center;
+        margin-top: 0; /* Adjusted for new placement */
+        margin-bottom: var(--gap-medium);
+        color: var(--text-dark);
+        font-style: italic;
+        line-height: 1.4;
     }
 
     p {
         text-align: center;
-        margin-bottom: var(--gap-medium);
+        margin-bottom: var(--gap-small);
         line-height: 1.5;
         color: var(--text-dark);
     }
@@ -127,11 +225,14 @@
     .riddle-text {
         font-style: italic;
         text-align: center;
-        padding: var(--gap-medium);
-        background-color: var(--bg-lightest); /* Near white background */
+        padding: var(--gap-medium) var(--gap-large); /* ENHANCED: More padding */
+        /* ENHANCED: Light transparent teal background */
+        background-color: rgba(var(--flyer-teal-rgb), 0.1);
         border-radius: var(--border-radius-base);
         margin-bottom: var(--gap-large);
-        border: 2px solid var(--secondary-grey-blue); /* Solid muted blue-gray border */
+        /* ENHANCED: Prominent border-left */
+        border: 1px solid var(--secondary-neutral);
+        border-left: 5px solid var(--flyer-teal);
         color: var(--text-dark);
     }
 
@@ -145,47 +246,76 @@
     .input-box input[type="text"] {
         font-size: 1.1em;
         padding: var(--gap-small) var(--gap-medium);
-        border-radius: var(--border-radius-base);
-        border: 2px solid var(--secondary-grey-blue); /* Muted blue-gray border */
-        background-color: white; /* Pure white input background */
+        border-radius: var(--border-radius-base); /* ENHANCED: Larger radius */
+        border: 2px solid var(--secondary-neutral); /* Mapped to new neutral */
+        background-color: white;
         color: var(--text-dark);
-        width: 80%; /* Default width */
-        max-width: 300px;
+        width: 80%;
+        max-width: 380px; /* Adjusted for screenshot appearance */
         box-sizing: border-box;
         outline: none;
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .input-box input[type="text"]:focus {
-        border-color: var(--primary-blue); /* Primary blue border on focus */
-        box-shadow: 0 0 8px rgba(var(--primary-blue-rgb), 0.3); /* Subtle blue glow */
+        border-color: var(--primary-accent); /* Mapped to Flyer Teal */
+        box-shadow: 0 0 0 3px rgba(var(--flyer-teal-rgb), 0.3); /* Mapped to Flyer Teal RGB */
     }
 
+    /* General Button Styling */
     button {
         padding: 0.8rem 1.5rem;
         font-size: 1.1em;
-        background-color: var(--primary-blue); /* Primary blue button */
-        color: var(--button-text-light); /* White text */
+        /* ENHANCED: Primary buttons now use Flyer Purple */
+        background-color: var(--flyer-purple);
+        color: var(--button-text-light);
         border: none;
-        border-radius: var(--border-radius-base);
+        border-radius: var(--border-radius-base); /* ENHANCED: Larger radius */
         cursor: pointer;
         transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.2s ease;
         font-weight: bold;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Professional button shadow */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
     button:hover:not(:disabled) {
-        background-color: hsl(210, 80%, 30%); /* Slightly darker blue on hover */
+        background-color: hsl(265, 30%, 38%); /* Darker purple on hover */
         transform: translateY(-2px);
-        box-shadow: 0 6px 8px rgba(0,0,0,0.15); /* Slightly larger shadow on hover */
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
+
+    button:active:not(:disabled) {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     button:disabled {
         background-color: var(--bg-light);
-        color: var(--secondary-grey-blue); /* Muted text for disabled */
+        color: var(--secondary-neutral);
         cursor: not-allowed;
         box-shadow: none;
     }
+
+    /* NEW: Specific styling for the screenshot button (already purple, just ensuring consistency) */
+    .final-message-button {
+        margin-top: var(--gap-large);
+        background-color: var(--flyer-purple); /* Flyer Purple for Screenshot Button */
+        color: var(--button-text-light);
+        padding: 1rem 2rem;
+        font-size: 1.3em;
+        box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+    }
+
+    .final-message-button:hover:not(:disabled) {
+        background-color: hsl(265, 30%, 38%); /* Slightly darker purple on hover */
+        transform: translateY(-3px);
+        box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+    }
+
+    .final-message-button:active:not(:disabled) {
+        transform: translateY(0px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
 
     /* Stage 2: Word Search Specific Styles */
     .word-search-content-wrapper {
@@ -196,21 +326,22 @@
         align-items: flex-start;
         gap: var(--gap-large);
         width: 100%;
-        padding: var(--gap-medium);
-        background-color: var(--bg-lightest); /* Near white background */
-        border-radius: var(--border-radius-base);
-        border: 2px solid var(--secondary-grey-blue); /* Solid muted blue-gray border */
+        padding: var(--gap-medium); /* CORRECTED PADDING */
+        background-color: var(--bg-lightest);
+        border-radius: var(--border-radius-base); /* ENHANCED: Larger radius */
+        border: 2px solid var(--secondary-neutral); /* Mapped to new neutral */
         box-sizing: border-box;
         margin-bottom: var(--gap-medium);
-        box-shadow: inset 0 0 5px rgba(0,0,0,0.05); /* Subtle inner shadow */
+        /* ENHANCED: Softer inner shadow for container */
+        box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
     }
 
     #grid {
         display: grid;
-        grid-template-columns: repeat(15, minmax(30px, 1fr)); /* Default cell size */
+        grid-template-columns: repeat(15, minmax(30px, 1fr));
         grid-auto-rows: 30px;
         gap: 2px;
-        width: fit-content; /* Allows grid to shrink as much as cells allow */
+        width: fit-content;
         flex-shrink: 0;
         flex-grow: 0;
     }
@@ -218,31 +349,40 @@
     .cell {
         width: 100%;
         height: 100%;
-        background: white; /* White background for cells */
-        border: 1px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+        background: white;
+        border: 1px solid var(--secondary-neutral); /* Mapped to new neutral */
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         user-select: none;
         font-weight: bold;
-        font-size: 0.85em; /* Default cell font size */
+        font-size: 0.85em;
         color: var(--text-dark);
-        transition: background-color 0.2s ease, border-color 0.2s ease;
-        border-radius: 2px; /* Slightly rounded cells */
+        /* ENHANCED: Subtle inner shadow for depth */
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
+        transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 2px;
+    }
+    .cell:hover:not(.selected):not(.found) {
+        background-color: var(--bg-light);
+        box-shadow: inset 0 1px 5px rgba(0,0,0,0.08);
     }
 
+
     .selected {
-        background: var(--primary-blue); /* Primary blue for selection */
-        border-color: var(--primary-blue);
-        color: var(--button-text-light); /* White text for contrast */
+        background: var(--primary-accent); /* Mapped to Flyer Teal */
+        border-color: var(--primary-accent);
+        color: var(--button-text-light);
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.2); /* Deeper inner shadow when selected */
     }
 
     .found {
-        background: var(--accent-green-professional); /* Professional green for found */
-        color: var(--button-text-light); /* White text for contrast */
-        border-color: var(--accent-green-professional);
+        background: var(--success-color); /* Mapped to Flyer Teal */
+        color: var(--button-text-light);
+        border-color: var(--success-color);
         animation: pulseFound 0.5s ease-out;
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
     }
 
     @keyframes pulseFound {
@@ -260,7 +400,7 @@
     }
 
     #words-list-container h3 {
-        color: var(--primary-blue); /* Primary blue for word list heading */
+        color: var(--primary-accent); /* Mapped to Flyer Teal */
         text-align: center;
         margin-top: 0;
         margin-bottom: var(--gap-small);
@@ -283,7 +423,7 @@
 
     #words li.found-word-list {
         text-decoration: line-through;
-        color: var(--accent-green-professional); /* Professional green for found words in list */
+        color: var(--success-color); /* Mapped to Flyer Teal */
         font-weight: bold;
     }
 
@@ -291,13 +431,14 @@
     #connections-container {
         max-width: 800px;
         margin: var(--gap-medium) auto;
-        padding: var(--gap-medium);
+        padding: var(--gap-medium); /* CORRECTED PADDING */
         background-color: var(--bg-lightest);
-        border-radius: var(--border-radius-base);
-        border: 2px solid var(--secondary-grey-blue); /* Solid muted blue-gray border */
+        border-radius: var(--border-radius-base); /* ENHANCED: Larger radius */
+        border: 2px solid var(--secondary-neutral); /* Mapped to new neutral */
         box-sizing: border-box;
         width: 100%;
-        box-shadow: inset 0 0 5px rgba(0,0,0,0.05); /* Subtle inner shadow */
+        /* ENHANCED: Softer inner shadow for container */
+        box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
     }
 
     #found-groups {
@@ -312,14 +453,16 @@
         margin-bottom: 1rem;
         align-items: center;
         padding: 0.5rem;
-        background-color: var(--bg-light); /* Light background for found groups */
-        border-radius: var(--border-radius-base);
-        border: 1px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+        /* UPDATED: Dynamic background color set by JS for found groups */
+        border-radius: var(--border-radius-base); /* ENHANCED: Larger radius */
+        border: 1px solid var(--secondary-neutral); /* Mapped to new neutral */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Subtle shadow for found groups */
+        transition: background-color 0.3s ease; /* Smooth transition for color change */
     }
 
     .group-label {
         font-weight: bold;
-        color: var(--primary-blue); /* Primary blue for group label */
+        color: var(--text-dark); /* Changed to dark text, as background color will vary */
         margin-right: 1rem;
         flex-basis: 100%;
         text-align: center;
@@ -336,12 +479,14 @@
 
     .tile {
         padding: 1rem;
-        border: 2px solid var(--secondary-grey-blue); /* Muted blue-gray border */
-        border-radius: var(--border-radius-base);
+        border: 2px solid var(--secondary-neutral); /* Mapped to new neutral */
+        border-radius: var(--border-radius-base); /* ENHANCED: Larger radius */
         cursor: pointer;
-        background-color: white; /* White tile background */
+        background-color: white;
         color: var(--text-dark);
-        transition: transform 0.2s, background-color 0.3s, color 0.3s, border-color 0.3s;
+        /* ENHANCED: Subtle inner shadow for depth and smooth transitions */
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.08);
+        transition: transform 0.2s, background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
         font-size: 16px;
         font-weight: bold;
         text-align: center;
@@ -349,26 +494,30 @@
         align-items: center;
         justify-content: center;
         min-height: 70px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08); /* Subtle tile shadow */
+    }
+    .tile:hover:not(.selected):not(.locked) {
+        transform: translateY(-2px);
+        box-shadow: inset 0 1px 5px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.12);
     }
 
+    /* UPDATED: Softer purple for selected tile */
     .tile.selected {
-        background-color: var(--accent-red-professional); /* Professional red selection */
-        color: var(--button-text-light); /* White text */
-        border-color: var(--accent-red-professional);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        background-color: rgba(var(--flyer-purple-rgb), 0.2); /* Faint purple */
+        color: var(--text-dark); /* Keep text dark for readability on faint background */
+        border-color: var(--connections-selected-color); /* Solid purple border for definition */
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.2); /* Stronger shadow when selected */
     }
 
+    /* UPDATED: Locked tiles get their color from parent group via JS inline style */
     .tile.locked {
-        background-color: var(--primary-blue); /* Primary blue locked */
-        color: var(--button-text-light); /* White text */
         cursor: default;
-        border-color: var(--primary-blue);
-        box-shadow: none;
+        color: var(--text-dark); /* Text color remains dark for readability */
+        border-color: rgba(0,0,0,0.1); /* Lighter border when locked */
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.2); /* Flat shadow when locked */
     }
 
     .tile.wrong {
-        border-color: var(--accent-red-professional); /* Professional red for wrong */
+        border-color: var(--error-color); /* Mapped to Flyer Red */
         animation: shake 0.3s;
     }
 
@@ -387,24 +536,24 @@
     }
 
     .btn-restart-connections {
-        background-color: var(--primary-blue); /* Primary blue restart button */
+        background-color: var(--primary-accent); /* Mapped to Flyer Teal */
         color: var(--button-text-light);
     }
 
     /* Stage 4: Team Match */
     #prompt-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Default prompt size */
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: var(--gap-large);
         margin-top: var(--gap-large);
         width: 100%;
     }
 
     .prompt {
-        background: var(--bg-light); /* Light background */
-        border: 2px solid var(--secondary-grey-blue); /* Muted blue-gray border */
+        background: var(--bg-light);
+        border: 2px solid var(--secondary-neutral); /* Mapped to new neutral */
         padding: var(--padding-base);
-        border-radius: var(--border-radius-base);
+        border-radius: var(--border-radius-base); /* ENHANCED: Larger radius */
         display: flex;
         flex-direction: column;
         gap: var(--gap-small);
@@ -414,18 +563,18 @@
     .prompt p {
         margin: 0;
         font-size: 0.9em;
-        color: var(--primary-blue); /* Primary blue for prompt text */
+        color: var(--primary-accent); /* Mapped to Flyer Teal */
         text-align: left;
         font-weight: bold;
     }
 
     .prompt input {
-        width: 100%; /* Make input fill its container */
+        width: 100%;
         padding: 0.5rem;
         font-size: 1em;
-        border-radius: var(--border-radius-base);
-        border: 2px solid var(--secondary-grey-blue); /* Muted blue-gray border */
-        background-color: white; /* White input background */
+        border-radius: var(--border-radius-base); /* ENHANCED: Larger radius */
+        border: 2px solid var(--secondary-neutral); /* Mapped to new neutral */
+        background-color: white;
         color: var(--text-dark);
         box-sizing: border-box;
         outline: none;
@@ -433,17 +582,8 @@
     }
 
     .prompt input:focus {
-        border-color: var(--primary-blue); /* Primary blue border on focus */
-        box-shadow: 0 0 8px rgba(var(--primary-blue-rgb), 0.3); /* Subtle blue glow */
-    }
-
-    .final-message {
-        margin-top: var(--gap-large);
-        color: var(--accent-green-professional); /* Professional green for final message */
-        font-weight: bold;
-        text-align: center;
-        font-size: 1.2em;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.02);
+        border-color: var(--primary-accent); /* Mapped to Flyer Teal */
+        box-shadow: 0 0 0 3px rgba(var(--flyer-teal-rgb), 0.3); /* Mapped to Flyer Teal RGB */
     }
 
     /* Notification Area */
@@ -463,84 +603,158 @@
     }
 
     #notificationArea.success {
-        background-color: var(--accent-green-professional); /* Professional green */
-        color: var(--button-text-light); /* White text */
+        background-color: var(--success-color); /* Mapped to Flyer Teal */
+        color: var(--button-text-light);
     }
 
     #notificationArea.error {
-        background-color: var(--accent-red-professional); /* Professional red */
-        color: var(--button-text-light); /* White text */
+        background-color: var(--error-color); /* Mapped to Flyer Red */
+        color: var(--button-text-light);
     }
+    /* NEW: Info notification for screenshot */
+    #notificationArea.info {
+        background-color: hsl(210, 20%, 85%); /* Light gray-blue for info */
+        color: var(--text-dark);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
 
     #notificationArea.visible {
         opacity: 1;
         visibility: visible;
     }
 
-    /* Utility to get RGB values for rgba() from HSL for shadows/glows */
-    :root {
-        --primary-blue-rgb: 21, 101, 192; /* HSL(210, 80%, 40%) */
+    /* NEW: Confetti Animation Styles */
+    #confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Allows clicks to pass through */
+        z-index: 9999;
+        overflow: hidden; /* Prevent scrollbars from confetti */
+    }
+
+    .confetti-particle {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: var(--primary-accent); /* Default confetti color (Teal) */
+        border-radius: 50%; /* Make them circular */
+        opacity: 0;
+        animation: confetti-fall 2s forwards ease-out;
+    }
+
+    /* Colors for confetti particles */
+    .confetti-particle:nth-child(3n) { background-color: var(--flyer-purple); }
+    .confetti-particle:nth-child(5n) { background-color: var(--flyer-red); }
+    .confetti-particle:nth-child(7n) { background-color: var(--flyer-teal); }
+    .confetti-particle:nth-child(11n) { background-color: white; }
+
+    @keyframes confetti-fall {
+        0% {
+            transform: translate(0, -100vh) rotateZ(0deg);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(var(--x-end), var(--y-end)) rotateZ(720deg);
+            opacity: 0;
+        }
     }
 
 
     /* Media queries for responsiveness */
     /* Tablet & Smaller Laptop Landscape */
     @media (max-width: 900px) {
+        .global-header {
+            padding: var(--gap-small) var(--gap-medium);
+        }
+        .global-header-title {
+            font-size: 1.5em;
+        }
+        .stage-indicator {
+            font-size: 1em;
+        }
+        .progress-bar-container {
+            margin: var(--gap-small) 0;
+        }
         #game-area {
-            min-height: 650px; /* Slightly reduce min-height */
+            min-height: 520px;
+            margin: var(--gap-medium) 0;
         }
         .stage {
-             padding: var(--gap-medium); /* Reduce side padding */
+             padding: var(--gap-small) var(--gap-medium);
+        }
+        .riddle-text {
+            padding: var(--gap-medium);
         }
     }
 
     /* Tablet Portrait & Large Phone Landscape */
     @media (max-width: 768px) {
         #game-area {
-            min-height: 550px;
+            min-height: 470px;
         }
         #grid {
-            grid-template-columns: repeat(15, minmax(28px, 1fr)); /* Slightly smaller cells */
+            grid-template-columns: repeat(15, minmax(28px, 1fr));
             grid-auto-rows: 28px;
         }
         .cell {
-            font-size: 0.8em; /* Adjust font size */
+            font-size: 0.8em;
         }
         #prompt-grid {
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Allow prompts to be smaller */
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         }
     }
 
     /* Smaller Phones & Tablet Portrait */
     @media (max-width: 500px) {
+        .global-header-title {
+            font-size: 1.2em;
+        }
+        .stage-indicator {
+            font-size: 0.9em;
+        }
         #game-area {
-            min-height: 500px; /* Further reduce min-height */
-            margin: var(--gap-medium) 0; /* Less margin on smaller screens */
+            min-height: 420px;
+            margin: var(--gap-medium) 0;
+        }
+        .stage {
+            padding: var(--gap-small);
         }
         h1 {
             font-size: 1.8em;
+        }
+        .stage-header-content .stage-icon {
+            font-size: 1.2em;
         }
         .riddle-text {
             padding: var(--gap-small);
             font-size: 0.95em;
         }
         .input-box input[type="text"] {
-            width: 90%; /* Increase width to fill more space */
-            padding: 0.6rem 0.8rem; /* Slightly reduced padding */
+            width: 90%;
+            padding: 0.6rem 0.8rem;
             font-size: 1em;
         }
         button {
             padding: 0.7rem 1.2rem;
             font-size: 1em;
         }
+        .final-message-button {
+            padding: 0.8rem 1.5rem;
+            font-size: 1.1em;
+        }
         .word-search-content-wrapper {
-            flex-direction: column; /* Stack word search elements vertically */
+            flex-direction: column;
             align-items: center;
-            gap: var(--gap-medium);
+            gap: var(--gap-small);
+            padding: var(--gap-small);
         }
         #words-list-container {
             width: 100%;
-            max-width: 250px; /* Constrain list width */
+            max-width: 250px;
             margin-top: 0;
         }
         #words {
@@ -552,12 +766,13 @@
              text-align: center;
         }
         #grid {
-            grid-template-columns: repeat(15, minmax(24px, 1fr)); /* More aggressive cell size reduction */
+            grid-template-columns: repeat(15, minmax(24px, 1fr));
             grid-auto-rows: 24px;
-            font-size: 0.7em; /* Smaller font for cells */
+            font-size: 0.7em;
+            gap: 1px;
         }
         #connections-grid {
-            grid-template-columns: repeat(2, 1fr); /* 2 columns for connections */
+            grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
         .tile {
@@ -570,40 +785,49 @@
         }
         #prompt-grid {
             gap: var(--gap-medium);
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Smaller prompts */
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         }
         .prompt input {
-            padding: 0.4rem; /* Reduced padding */
-            font-size: 0.9em; /* Reduced font size */
+            padding: 0.4rem;
+            font-size: 0.9em;
         }
     }
 
     /* Very Small Phones (e.g., iPhone SE portrait) */
     @media (max-width: 360px) {
+        .global-header-title {
+            font-size: 1em;
+        }
+        .stage-indicator {
+            font-size: 0.8em;
+        }
         #game-area {
-            min-height: 450px; /* Minimum height for very small screens */
-            width: 95%; /* Use more screen width */
+            min-height: 380px;
+            width: 95%;
         }
         h1 {
             font-size: 1.6em;
+        }
+        .stage-header-content .stage-icon {
+            font-size: 1em;
         }
         .riddle-text {
             font-size: 0.9em;
             padding: var(--gap-small);
         }
         .input-box input[type="text"] {
-            width: 95%; /* Even wider to fit small screens */
-            padding: 0.3rem 0.5rem; /* Minimal padding */
-            font-size: 0.85em; /* Even smaller font */
+            width: 95%;
+            padding: 0.3rem 0.5rem;
+            font-size: 0.85em;
         }
         #grid {
-            grid-template-columns: repeat(15, minmax(18px, 1fr)); /* Very small cells for tight fit */
+            grid-template-columns: repeat(15, minmax(18px, 1fr));
             grid-auto-rows: 18px;
-            font-size: 0.6em; /* Even smaller font */
-            gap: 1px; /* Reduce gap between cells */
+            font-size: 0.6em;
+            gap: 1px;
         }
         .cell {
-            border-width: 0.5px; /* Thinner borders for very small cells */
+            border-width: 0.5px;
         }
         #words li {
             font-size: 0.9em;
@@ -615,17 +839,14 @@
             font-size: 12px;
             min-height: 50px;
             padding: 0.5rem;
-            border-width: 1px; /* Thinner tile borders */
+            border-width: 1px;
         }
         .group-label {
             font-size: 0.8em;
         }
         #prompt-grid {
             gap: var(--gap-small);
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Smallest prompt size */
-        }
-        .prompt p {
-            font-size: 0.85em;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         }
         .prompt input {
             padding: 0.4rem;
@@ -636,34 +857,62 @@
 </style>
 </head>
 <body>
-<header>
-<img src="https://i.imgur.com/d3304b6e-5565-403d-8499-a9ef150ef943.png" alt="Flyer Logo" />
+
+<header class="global-header">
+    <h1 class="global-header-title">Breakout and Bond</h1>
+    <div class="stage-indicator">Stage <span id="currentStageNumber">0</span> of 4</div>
 </header>
+
+<div class="progress-bar-container">
+    <div class="progress-segment" data-segment="1"></div>
+    <div class="progress-segment" data-segment="2"></div>
+    <div class="progress-segment" data-segment="3"></div>
+    <div class="progress-segment" data-segment="4"></div>
+</div>
 
 <div id="notificationArea" class="notification-message"></div>
 
+<div id="confetti-container"></div>
+
 <div id="game-area">
-    <div class="stage active" data-stage="1">
-        <h1>Stage 1: Solve the Riddle</h1>
+    <div class="stage active" data-stage="0">
+        <p class="stage-instruction" id="stage-0-instruction"></p> <div class="stage-header-content">
+            <span class="stage-icon">🚀</span>
+            <h1>Welcome!</h1>
+        </div>
+        <div class="input-box">
+            <input type="text" id="teamNameInput" placeholder="Enter team name..." />
+            <button id="teamNameSubmitBtn">Start Game</button>
+        </div>
+    </div>
+
+    <div class="stage" data-stage="1">
+        <p id="stage-1-instruction" class="stage-instruction"></p> <div class="stage-header-content">
+            <span class="stage-icon">🧩</span>
+            <h1>Stage 1: Solve the Riddle</h1>
+        </div>
         <p class="riddle-text">
             I am not a bird, yet I help you soar,<br>
             From shopfloor tasks to strategic core.<br>
             I don’t give wings, but I shift your view,<br>
             From technical depth to business too.<br>
             You started with tools, now you lead with insight,<br>
-            Evolving each day, taking bold flight.<<br>
+            Evolving each day, taking bold flight.<br>
             A first-line spark, with a curious mind,<br>
             What program am I — for the driven, the kind?
         </p>
         <div class="input-box">
-            <input type="text" id="riddleAnswer" placeholder="Enter here..." />
+            <input type="text" id="riddleAnswer" placeholder="Enter here.." />
             <button id="riddleSubmitBtn">Submit</button>
         </div>
     </div>
 
     <div class="stage" data-stage="2">
-        <h1>Stage 2: Word Search</h1>
-        <p>Find all the hidden words to proceed to the next stage.</p>
+        <p id="stage-2-instruction" class="stage-instruction"></p> <div class="stage-header-content">
+            <span class="stage-icon">🔍</span>
+            <h1>Stage 2: Word Search</h1>
+        </div>
+        
         <div class="word-search-content-wrapper">
             <div id="grid"></div> <div id="words-list-container">
                 <h3>Words to Find</h3>
@@ -675,24 +924,27 @@
     </div>
 
     <div class="stage" data-stage="3">
-        <h1>Stage 3: Flyer Connections</h1>
-        <p>Find groups of four items that share a common thread.</p>
+        <p id="stage-3-instruction" class="stage-instruction"></p> <div class="stage-header-content">
+            <span class="stage-icon">🔗</span>
+            <h1>Stage 3: Flyer Connections</h1>
+        </div>
+        
         <div id="connections-container">
             <div id="found-groups"></div>
             <div id="connections-grid"></div> <div id="connections-buttons">
-                <button class="btn-restart-connections" id="connectionsRestartBtn">Restart</button>
                 </div>
         </div>
     </div>
 
     <div class="stage" data-stage="4">
-        <h1>Stage 4: Match the Team</h1>
-        <p>Time for some virtual fun with Human Bingo! Mingle in breakouts, fill your card by finding matches, and learn cool things about each other. We’ll ask what you found—so listen up! Remember to take a screenshot of your card and drop it in the main chat once you're done!"!</p>
+        <p id="stage-4-instruction" class="stage-instruction"></p> <div class="stage-header-content">
+            <span class="stage-icon">🤝</span>
+            <h1>Stage 4: Match the Team</h1>
+        </div>
+        
         <div id="prompt-grid">
             </div>
-        <p id="stage3CompletionMessage" class="final-message" style="display: none;">
-            ✅ All prompts filled! Once done, take a screenshot and share it in the main chat!
-        </p>
+        <button id="screenshotButton" class="action-button final-message-button">Take Screenshot</button>
     </div>
 </div> <script>
     // Configuration Object: Centralized game data
@@ -731,7 +983,14 @@
                 "FLYER Elements": ["Development", "IIM Bangalore", "Growth Opportunities", "Leadership Access"],
                 "Places to explore at IIM B": ["Mustard Cafe", "Library", "Jigani Campus", "Forest trail"],
                 "RIL industry bandwidth": ["Only Vimal", "Spice Trading", "Refinery", "Telecom"]
-            }
+            },
+            // NEW: Colors for found connections groups
+            groupColors: [
+                "rgba(var(--flyer-teal-rgb), 0.2)",       // Light Teal
+                "rgba(var(--flyer-purple-rgb), 0.2)",     // Light Purple
+                "rgba(var(--flyer-red-rgb), 0.2)",        // Light Red/Pink
+                "hsl(45, 100%, 95%)"                      // Light Yellow/Gold
+            ]
         },
         teamMatch: {
             prompts: [
@@ -745,34 +1004,42 @@
                 { id: 'p7', text: 'Listened to music while working' },
                 { id: 'p8', text: 'Have travelled solo / dream destination' },
                 { id: 'p9', text: 'Is excited about the IIM Bangalore program' }
-                // Removed 'p11': 'Has a clear career goal for the next 5 years' (Assuming this was the intended 'p12' if a third was to be removed)
-                // Note: There was no 'p12' in the original code. If you meant to remove p11, it's removed here.
-                // If you only meant to remove p1 and p5, please re-add p11 manually.
             ]
+        },
+        // Instructions for each stage, using a placeholder for team name
+        instructions: {
+            0: "Before we embark on this adventure, please enter your team name.",
+            1: "Hey {TEAM_NAME}! Your first challenge: Solve this riddle to unlock the next stage.",
+            2: "Awesome, {TEAM_NAME}! Now, find all the hidden words in the grid to proceed.",
+            3: "Great job, {TEAM_NAME}! Connect the dots: Find groups of four items that share a common thread.",
+            4: "Final challenge, {TEAM_NAME}! Fill your card by finding matches, and learn cool things about each other. We’ll ask what you found—so listen up! Remember to take a screenshot of your card and drop it in the main chat once you're done!",
         }
     };
 
     // Main Game Class for managing all game logic and state
     class FlyerEscapeRoom {
         constructor() {
-            this.currentStage = 1;
+            this.currentStage = 0;
+            this.teamName = '';
+
             // Word Search properties
             this.foundWords = new Set();
             this.isMouseDown = false;
-            this.wordSearchSelection = []; // Renamed to avoid conflict
+            this.wordSearchSelection = [];
 
             // Connections game properties
-            this.connectionsAllWords = []; // Will be populated from CONFIG.connections.categories
+            this.connectionsAllWords = [];
             this.connectionsSelectedWords = [];
             this.connectionsMatchedGroups = new Set();
-            this.connectionsRestartCount = 0; // Track restarts for potential penalty or info
+            this.nextGroupColorIndex = 0; // NEW: To cycle through colors
 
             this.notificationTimeout = null;
 
             this.initDOMReferences();
             this.bindEvents();
             this.initializeStages();
-            this.renderStage(this.currentStage);
+            this.updateProgressBar(); // NEW: Initial progress bar update
+            this.renderStage(this.currentStage); // Render initial stage (Stage 0)
         }
 
         /**
@@ -780,6 +1047,13 @@
          */
         initDOMReferences() {
             this.stages = document.querySelectorAll('.stage');
+            // NEW: Global Header references
+            this.currentStageNumberSpan = document.getElementById('currentStageNumber');
+            this.progressSegments = document.querySelectorAll('.progress-segment');
+
+            // Stage 0 (Team Name)
+            this.teamNameInput = document.getElementById('teamNameInput');
+            this.teamNameSubmitBtn = document.getElementById('teamNameSubmitBtn');
             // Stage 1
             this.riddleAnswerInput = document.getElementById('riddleAnswer');
             this.riddleSubmitBtn = document.getElementById('riddleSubmitBtn');
@@ -789,19 +1063,36 @@
             // Stage 3 (Connections)
             this.connectionsContainer = document.getElementById('connections-container');
             this.foundGroupsDiv = document.getElementById('found-groups');
-            this.connectionsGridDiv = document.getElementById('connections-grid'); // Renamed
-            this.connectionsRestartBtn = document.getElementById('connectionsRestartBtn'); // New button ID
+            this.connectionsGridDiv = document.getElementById('connections-grid');
             // Stage 4 (Team Match)
             this.promptGridDiv = document.getElementById('prompt-grid');
-            this.stage4CompletionMessage = document.getElementById('stage3CompletionMessage'); // Renamed ID
+            this.screenshotButton = document.getElementById('screenshotButton'); // NEW: Reference to the screenshot button
             
             this.notificationArea = document.getElementById('notificationArea');
+            this.confettiContainer = document.getElementById('confetti-container'); // NEW: Confetti container
+
+            // References for stage instruction paragraphs
+            this.stageInstructions = {};
+            this.stages.forEach(stage => {
+                const stageNum = parseInt(stage.dataset.stage);
+                if (stageNum >= 0) { // Instructions start from Stage 0
+                    this.stageInstructions[stageNum] = stage.querySelector(`#stage-${stageNum}-instruction`);
+                }
+            });
         }
 
         /**
          * Binds all necessary event listeners.
          */
         bindEvents() {
+            // Stage 0: Team Name submission
+            this.teamNameSubmitBtn.addEventListener('click', () => this.processTeamName());
+            this.teamNameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    this.processTeamName();
+                }
+            });
+
             // Stage 1: Riddle submission
             this.riddleSubmitBtn.addEventListener('click', () => this.checkRiddle());
             this.riddleAnswerInput.addEventListener('keydown', (e) => {
@@ -823,17 +1114,17 @@
             });
 
             // Stage 3: Connections Game events
-            // Use event delegation for tiles as they are created dynamically
             this.connectionsGridDiv.addEventListener('click', (event) => {
                 const targetTile = event.target.closest('.tile');
                 if (targetTile) {
                     this.handleConnectionsTileClick(targetTile);
                 }
             });
-            this.connectionsRestartBtn.addEventListener('click', () => this.restartConnectionsGame());
 
-            // Stage 4: Team Match events
-            this.promptGridDiv.addEventListener('input', () => this.checkStage4Completion());
+            // NEW: Stage 4 Screenshot button
+            this.screenshotButton.addEventListener('click', () => {
+                this.showNotification("💡 To screenshot: Press 'PrtSc' key, then paste (Ctrl+V) into Teams chat window.", 'info', 8000);
+            });
         }
 
         /**
@@ -842,13 +1133,13 @@
         initializeStages() {
             this.createWordSearchGrid();
             this.updateWordListDisplay();
-            this.initializeConnectionsGame(); // New initialization for Connections
+            this.initializeConnectionsGame();
             this.createPromptGrid();
         }
 
         /**
          * Displays a specific game stage and hides others.
-         * @param {number} stageNum The number of the stage to render (1, 2, 3, or 4).
+         * @param {number} stageNum The number of the stage to render (0, 1, 2, 3, or 4).
          */
         renderStage(stageNum) {
             this.stages.forEach(stage => {
@@ -859,6 +1150,49 @@
                 }
             });
             this.currentStage = stageNum;
+            this.updateProgressBar(); // NEW: Update progress bar on stage change
+
+            // Update instruction for the newly active stage
+            if (this.stageInstructions[stageNum]) {
+                let instructionText = CONFIG.instructions[stageNum];
+                if (this.teamName) {
+                    instructionText = instructionText.replace('{TEAM_NAME}', this.teamName);
+                }
+                this.stageInstructions[stageNum].textContent = instructionText;
+            }
+        }
+
+        /**
+         * NEW: Updates the global stage indicator and progress bar.
+         */
+        updateProgressBar() {
+            // Update current stage number in header
+            this.currentStageNumberSpan.textContent = this.currentStage;
+
+            // Update progress bar segments (Stage 1 to 4 are actual game stages)
+            // If currentStage is 0, no segments are active yet.
+            for (let i = 0; i < this.progressSegments.length; i++) {
+                const segmentStage = parseInt(this.progressSegments[i].dataset.segment);
+                if (this.currentStage >= segmentStage) {
+                    this.progressSegments[i].classList.add('active');
+                } else {
+                    this.progressSegments[i].classList.remove('active');
+                }
+            }
+        }
+
+        // Stage 0 Logic: Team Name Input
+        processTeamName() {
+            const name = this.teamNameInput.value.trim();
+            if (name === '') {
+                this.showNotification("Team Name cannot be blank!", 'error');
+                return;
+            }
+            this.teamName = name;
+            this.showNotification(`Welcome, ${this.teamName}! Let's begin!`, 'success');
+            setTimeout(() => {
+                this.renderStage(1); // Move to Stage 1
+            }, 1500);
         }
 
         // --- Stage 1 Logic: Solve the Riddle ---
@@ -868,6 +1202,7 @@
                 this.showNotification(CONFIG.riddle.successMessage, 'success');
                 this.riddleSubmitBtn.disabled = true;
                 this.riddleAnswerInput.disabled = true;
+                this.triggerConfetti(); // NEW: Trigger confetti on stage completion
                 setTimeout(() => {
                     this.renderStage(2); // Auto-advance to Stage 2
                     this.riddleAnswerInput.value = '';
@@ -972,7 +1307,7 @@
 
             const selectedWordChars = this.wordSearchSelection.map(el => el.textContent);
             const selectedWord = selectedWordChars.join('');
-            const reversedSelectedWord = selectedWordChars.slice().reverse().join(''); // Use slice() to prevent modifying original
+            const reversedSelectedWord = selectedWordChars.slice().reverse().join('');
 
             const foundMatch = CONFIG.wordSearch.words.find(word =>
                 word === selectedWord || word === reversedSelectedWord
@@ -986,7 +1321,8 @@
 
                 if (this.foundWords.size === CONFIG.wordSearch.words.length) {
                     this.showNotification("🎉 All words found! Advancing to the next stage.", 'success', 2000);
-                    setTimeout(() => this.renderStage(3), 2500); // Auto-advance to Stage 3 (Connections)
+                    this.triggerConfetti(); // NEW: Trigger confetti on stage completion
+                    setTimeout(() => this.renderStage(3), 2500);
                 }
             } else {
                 this.clearWordSearchSelection();
@@ -1008,8 +1344,8 @@
             this.connectionsAllWords = Object.values(CONFIG.connections.categories).flat().sort(() => 0.5 - Math.random());
             this.connectionsSelectedWords = [];
             this.connectionsMatchedGroups.clear();
-            // this.connectionsRestartCount = 0; // Keep track of restarts, don't reset unless explicit full game restart
-            this.foundGroupsDiv.innerHTML = ""; // Clear found groups display
+            this.foundGroupsDiv.innerHTML = "";
+            this.nextGroupColorIndex = 0; // Reset color index
             this.createConnectionsGrid();
         }
 
@@ -1019,15 +1355,13 @@
                 const div = document.createElement("div");
                 div.classList.add("tile");
                 div.textContent = word;
-                // Event listener is on the parent container (connectionsGridDiv) now for delegation
                 this.connectionsGridDiv.appendChild(div);
             });
         }
 
-        handleConnectionsTileClick(tile) { // Removed event parameter, now directly passes tile
+        handleConnectionsTileClick(tile) {
             if (tile.classList.contains("locked")) return;
 
-            // If we're at 4 selected words, this click implies a new selection or deselection
             if (this.connectionsSelectedWords.length === 4 && !tile.classList.contains("selected")) {
                 this.showNotification("You've already selected 4 words. Deselect one or validate.", 'error', 2000);
                 return;
@@ -1050,7 +1384,6 @@
         validateConnectionsSelection() {
             let foundCategory = null;
             for (const [category, words] of Object.entries(CONFIG.connections.categories)) {
-                // Check if all selected words are in the current category AND the category hasn't been found yet
                 const isMatch = this.connectionsSelectedWords.every(word => words.includes(word));
                 if (isMatch && !this.connectionsMatchedGroups.has(category)) {
                     foundCategory = category;
@@ -1064,7 +1397,8 @@
                 this.showNotification(`Correct! Found: "${foundCategory}"`, 'success');
                 if (this.connectionsMatchedGroups.size === Object.keys(CONFIG.connections.categories).length) {
                     this.showNotification("🎉 All connections found! Advancing to the final stage.", 'success', 2500);
-                    setTimeout(() => this.renderStage(4), 3000); // Auto-advance to Stage 4 (Team Match)
+                    this.triggerConfetti(); // NEW: Trigger confetti on stage completion
+                    setTimeout(() => this.renderStage(4), 3000);
                 }
             } else {
                 this.showWrongConnectionsSelection();
@@ -1076,21 +1410,25 @@
         showConnectionsGroup(category) {
             const groupDiv = document.createElement("div");
             groupDiv.className = "group";
+            // NEW: Assign a unique background color to the group
+            groupDiv.style.backgroundColor = CONFIG.connections.groupColors[this.nextGroupColorIndex % CONFIG.connections.groupColors.length];
+            this.nextGroupColorIndex++; // Move to next color
+
             const label = document.createElement("div");
             label.className = "group-label";
             label.textContent = category;
             groupDiv.appendChild(label);
 
             const tilesToMove = [];
-            // Collect selected tiles first to avoid issues with live DOM iteration
             document.querySelectorAll('#connections-grid .tile.selected').forEach(tile => {
                 tilesToMove.push(tile);
             });
 
             tilesToMove.forEach(tile => {
                 tile.classList.remove("selected");
-                tile.classList.add("locked");
-                groupDiv.appendChild(tile); // Move the tile to the found-groups container
+                tile.classList.add("locked"); // Add locked class
+                tile.style.backgroundColor = 'transparent'; // Tile itself is transparent, inherits group color
+                groupDiv.appendChild(tile); // Move tile into the group div
             });
             this.foundGroupsDiv.appendChild(groupDiv);
         }
@@ -1100,18 +1438,12 @@
                 tile.classList.add("wrong");
                 setTimeout(() => {
                     tile.classList.remove("wrong");
-                    tile.classList.remove("selected"); // Deselect after showing wrong
-                }, 400);
+                    tile.classList.remove("selected");
+                }, 400); // Timing confirmed by user
             });
         }
 
-        restartConnectionsGame() {
-            this.connectionsRestartCount++;
-            this.showNotification(`Restarting Connections game. Attempts: ${this.connectionsRestartCount}`, 'error', 2000); // Inform restart
-            this.initializeConnectionsGame();
-        }
-
-        // --- Stage 4 Logic: Match the Team (formerly Stage 3) ---
+        // --- Stage 4 Logic: Match the Team ---
         createPromptGrid() {
             this.promptGridDiv.innerHTML = '';
             CONFIG.teamMatch.prompts.forEach(prompt => {
@@ -1120,18 +1452,6 @@
                 div.innerHTML = `<p>${prompt.text}</p><input type="text" data-prompt-id="${prompt.id}" placeholder="Enter Name" />`;
                 this.promptGridDiv.appendChild(div);
             });
-        }
-
-        checkStage4Completion() { // Renamed from checkStage3Completion
-            const inputs = this.promptGridDiv.querySelectorAll('input[type="text"]');
-            const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
-            if (allFilled) {
-                this.stage4CompletionMessage.style.display = 'block';
-                this.showNotification("All prompts are filled! Ready for screenshot!", 'success', 0);
-            } else {
-                this.stage4CompletionMessage.style.display = 'none';
-                this.clearNotification();
-            }
         }
 
         // --- General Utilities ---
@@ -1156,6 +1476,39 @@
                 this.notificationArea.className = 'notification-message';
                 this.notificationArea.textContent = '';
             }, 300);
+        }
+
+        // NEW: Confetti Trigger Function
+        triggerConfetti() {
+            const numParticles = 100; // UPDATED: More confetti
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('confetti-particle');
+                
+                // Randomize initial position, size, and animation delay
+                const startX = Math.random() * window.innerWidth;
+                const startY = Math.random() * -50; // Start slightly above view
+                const endX = startX + (Math.random() - 0.5) * 600; // Drift left/right (slightly more spread)
+                const endY = window.innerHeight + 50; // Fall past bottom
+
+                particle.style.left = `${startX}px`;
+                particle.style.top = `${startY}px`;
+                particle.style.setProperty('--x-end', `${endX - startX}px`);
+                particle.style.setProperty('--y-end', `${endY - startY}px`);
+                particle.style.animationDelay = `${Math.random() * 0.8}s`;
+                particle.style.animationDuration = `${2 + Math.random() * 1.5}s`; // 2 to 3.5 seconds fall
+
+                const size = 5 + Math.random() * 10; // 5px to 15px
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+
+                this.confettiContainer.appendChild(particle);
+
+                // Clean up particle after its animation
+                particle.addEventListener('animationend', () => {
+                    particle.remove();
+                });
+            }
         }
     }
 
